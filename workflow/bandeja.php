@@ -11,6 +11,27 @@ if (isset($_POST["salir"]))
 	header("Location: index.php");
 	exit();
 }
+
+while ($fila=mysqli_fetch_array($resultado))
+{
+	$empiezoTime = $fila["fechaini"];
+	$dateTime = date("Y-m-d H:i:s");
+
+	$a = new DateTime($empiezoTime);
+	$b = new DateTime($dateTime);
+	$sec = (abs($b->getTimestamp() - ($a)->getTimestamp()));
+
+	$diff = intval(259200 - $sec);
+	
+	if ($diff < 0)
+	{
+		$sql3 = "UPDATE `seguimiento` SET `fechafin`='$dateTime'";
+		$sql3 .= " WHERE `nroTramite`='".$fila['nroTramite']."' and `codFlujo`='".$fila['codFlujo']."' and `codProceso`='".$fila['codProceso']."' and `usuario`='".$fila['usuario']."'";
+		$res3 = mysqli_query($conn, $sql3);
+	}
+}
+$resultado=mysqli_query($conn, $sql);
+
 ?>
 
 <div class="d-flex justify-content-around">
@@ -38,7 +59,9 @@ if (isset($_POST["salir"]))
 			<th scope="col">Flujo</th>
 			<th scope="col">Proceso</th>
 			<th scope="col"> Proceso T </th>	
+			<th scope="col">Tiempo Restante</th>
 			<th scope="col">Accion</th>
+			
 		</tr>
 	</thead>
 		<?php
@@ -56,8 +79,31 @@ if (isset($_POST["salir"]))
 
 		echo "<td>".$fila2["formulario"]."</td>";
 
-	echo "<td><a href='motor.php?flujo=".$fila["codFlujo"]."&proceso=".$fila["codProceso"]."&tramite=".$fila["nroTramite"]."'>Ver</a></td>";
-	echo "</tr>";
+		$empiezoTime = $fila["fechaini"];
+		$dateTime = date("Y-m-d H:i:s");
+
+		$a = new DateTime($empiezoTime);
+		$b = new DateTime($dateTime);
+		$sec = (abs($b->getTimestamp() - ($a)->getTimestamp()));
+
+		$diff = intval(259200 - $sec);
+		
+		if ($diff < 0)
+		{
+			echo "<td>Nada</td>";
+		}
+		else 
+		{
+			$dia = intdiv($diff, 86400);
+			$hora = intdiv(($diff % 86400), 3600);
+			$minuto = intdiv((($diff % 86400) % 3600), 60);
+			$segundo = ((($diff % 86400) % 3600) % 60);
+			$mostrar = $dia." dias, ".$hora."h:".$minuto."m:".$segundo."s";
+			echo "<td>".$mostrar."</td>";
+		}
+		
+		echo "<td><a href='motor.php?flujo=".$fila["codFlujo"]."&proceso=".$fila["codProceso"]."&tramite=".$fila["nroTramite"]."'>Ver</a></td>";
+		echo "</tr>";
 	}
 	?>
 	</table>

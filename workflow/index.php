@@ -10,7 +10,7 @@
 	}
 	$textError = "<h4> Error en el usuario o contraseña </h4>";
 	
-	if ($_SESSION["IdUser"])
+	if (isset($_SESSION["IdUser"]))
 	{
 		header("Location: bandeja.php");
 		exit();
